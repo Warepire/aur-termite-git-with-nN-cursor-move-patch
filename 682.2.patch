@@ -1,0 +1,34 @@
+From fb3ec4f54ecaf143ea1ebec15a92d5ff6c727b4f Mon Sep 17 00:00:00 2001
+From: Warepire <Warepire@users.noreply.github.com>
+Date: Wed, 19 Jun 2019 22:34:07 +0200
+Subject: [PATCH 2/2] Sanitize cursor_col in move_backward
+
+If the user moved the cursor using free movement (h/j/k/l) to a position
+beyond input on a line with input, and then used back-word, the jump
+would be off by the amount of characters that would be in the space
+between the cursor and the input.
+
+Before calculating the start of the word, snap cursor_col to the
+last character of input.
+
+Upstream-Status: Submitted
+Patch-URI: https://github.com/thestinger/termite/pull/682
+---
+ termite.cc | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/termite.cc b/termite.cc
+index 987c128..41c3534 100644
+--- a/termite.cc
++++ b/termite.cc
+@@ -626,6 +626,10 @@ static void move_backward(VteTerminal *vte, select_info *select, F is_word) {
+         return;
+     }
+ 
++    // sanitize cursor_col, if the user moved the cursor using free movement beyond the end of
++    // the line input the matching be off for one 'word'.
++    cursor_col = length;
++
+     bool in_word = false;
+ 
+     long i = length - 1;

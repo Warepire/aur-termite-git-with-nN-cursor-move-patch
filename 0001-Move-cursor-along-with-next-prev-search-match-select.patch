@@ -5,6 +5,7 @@ Subject: [PATCH] Move cursor along with next/prev search match selection.
 
 Upstream-Status: Rejected
 Patch-URI: https://github.com/thestinger/termite/issues/287#issuecomment-207836220
+Patch-URI: https://github.com/thestinger/termite/issues/287#issuecomment-512229720 (updates from wizeman)
 ---
  termite.cc | 8 ++++++++
  1 file changed, 8 insertions(+)
@@ -39,6 +40,18 @@ index bdb01e3..ea6e965 100644
                  break;
              case GDK_KEY_u:
                  search(vte, url_regex, false);
+@@ -1132,9 +1140,11 @@ gboolean entry_key_press_cb(GtkEntry *entry, GdkEventKey *event, keybind_info *i
+             switch (info->panel.mode) {
+                 case overlay_mode::search:
+                     search(info->vte, text, false);
++                    move_to_selection(info->vte);
+                     break;
+                 case overlay_mode::rsearch:
+                     search(info->vte, text, true);
++                    move_to_selection(info->vte);
+                     break;
+                 case overlay_mode::completion:
+                     vte_terminal_feed_child(info->vte, text, -1);
 -- 
 2.18.0
 

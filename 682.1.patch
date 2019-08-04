@@ -1,0 +1,37 @@
+From 492471769d15a9e22814dc7ec0b2978a21128cb8 Mon Sep 17 00:00:00 2001
+From: Warepire <Warepire@users.noreply.github.com>
+Date: Wed, 19 Jun 2019 22:30:39 +0200
+Subject: [PATCH 1/2] Fix off-by-one in move_backwards
+
+Moving backwards using b/B would move the cursor to the 2nd character
+of a word, and omit 1 character words.
+
+Upstream-Status: Submitted
+Patch-URI: https://github.com/thestinger/termite/pull/682
+---
+ termite.cc | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/termite.cc b/termite.cc
+index e168e77..987c128 100644
+--- a/termite.cc
++++ b/termite.cc
+@@ -628,8 +628,8 @@ static void move_backward(VteTerminal *vte, select_info *select, F is_word) {
+ 
+     bool in_word = false;
+ 
+-    for (long i = length - 2; i > 0; i--) {
+-        cursor_col--;
++    long i = length - 1;
++    for (; i > 0; i--) {
+         if (!is_word(codepoints[i - 1])) {
+             if (in_word) {
+                 break;
+@@ -638,6 +638,7 @@ static void move_backward(VteTerminal *vte, select_info *select, F is_word) {
+             in_word = true;
+         }
+     }
++    cursor_col = std::max<long>(cursor_col - (length - i), 0);
+     vte_terminal_set_cursor_position(vte, cursor_col, cursor_row);
+     update_selection(vte, select);
+ 
